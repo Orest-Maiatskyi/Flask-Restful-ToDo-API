@@ -1,0 +1,488 @@
+openapi: 3.0.0
+info:
+  title: Rest ToDo API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1/
+    description: Dev flask server
+
+
+paths:
+  
+  /auth:
+    get:
+      summary: Login method
+      tags:
+        - AUTH
+      
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+          required: true
+          description: User email
+        - in: query
+          name: password
+          schema:
+            type: string
+          required: true
+          description: User password
+      
+      responses:
+        '200':
+          description: Successfully logged in
+        
+        '400':
+          description: Bad request params
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '401':
+          description: Bad request param
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '422':
+          description: Bad request param
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    
+    post:
+      summary: Register method
+      tags:
+        - AUTH
+      
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+          required: true
+          description: User email
+        - in: query
+          name: password
+          schema:
+            type: string
+          required: true
+          description: User password
+      
+      responses:
+        '201':
+          description: Successfully registered
+        
+        '400':
+          description: Bad request params
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '409':
+          description: This email is already registered
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '422':
+          description: Bad request param
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    
+    delete:
+      
+      security:
+        - bearerAuth: []
+      
+      summary: Delete account method
+      tags:
+        - AUTH
+      
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+          required: true
+          description: User email
+        - in: query
+          name: password
+          schema:
+            type: string
+          required: true
+          description: User password
+      
+      responses:
+        '200':
+          description: Successfully deleted
+        
+        '400':
+          description: Bad request params
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '409':
+          description: This email is already registered
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '422':
+          description: Bad request param
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    
+  /todo/{public_id}:
+    get:
+      security:
+        - bearerAuth: []
+        
+      summary: Method for getting a todo by public_id
+      tags:
+        - TODO
+      
+      parameters: 
+        - name: public_id
+          in: path
+          required: true
+          description: public todo id
+          schema:
+            type: string
+            example: 1790db46-376a-4da4-a6e5-40281c0c3861
+      
+      responses:
+        '200':
+          description: Successfully got all todos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToDo"
+        
+        '204':
+          description: No such todo with current public id
+        
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+      
+  /todo/all:
+    get:
+      security:
+        - bearerAuth: []
+
+      summary: Method for getting all todos
+      tags:
+        - TODO
+      responses:
+        '200':
+          description: Successfully got all todos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToDos"
+        
+        '204':
+          description: No todos yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  
+  /todo/create:
+    post:
+      security:
+        - bearerAuth: []
+      
+      summary: Method for creating new todo item
+      tags:
+        - TODO
+      
+      parameters:
+        - in: query
+          name: title
+          schema:
+            type: string
+            example: Example-Title
+          required: true
+          description: Todo title
+        - in: query
+          name: body
+          schema:
+            type: string
+            example: Example-Body
+          required: true
+          description: Todo body
+        - in: query
+          name: is_done
+          schema:
+            type: boolean
+            example: false
+          required: true
+          description: Todo status
+        - in: query
+          name: expiration_time
+          schema:
+            type: string
+            example: "2023-09-27 01:24:59.913892"
+          required: true
+          description: Todo expiration time
+      
+      responses:
+        '200':
+          description: The new todo has been successfully created
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '400':
+          description: Bad request params
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '422':
+          description: Bad request param
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  
+  /todo/update/{public_id}:
+    put:
+      security:
+        - bearerAuth: []
+      
+      summary: Method for updating todos
+      tags:
+        - TODO
+      
+      parameters: 
+        - name: public_id
+          in: path
+          required: true
+          description: public todo id
+          schema:
+            type: string
+            example: 1790db46-376a-4da4-a6e5-40281c0c3861
+
+        - in: query
+          name: title
+          schema:
+            type: string
+            example: Example-Title
+          required: true
+          description: Todo title
+        - in: query
+          name: body
+          schema:
+            type: string
+            example: Example-Body
+          required: true
+          description: Todo body
+        - in: query
+          name: is_done
+          schema:
+            type: boolean
+            example: false
+          required: true
+          description: Todo status
+        - in: query
+          name: expiration_time
+          schema:
+            type: string
+            example: "2023-09-27 01:24:59.913892"
+          required: true
+          description: Todo expiration time
+      
+      
+      responses:
+        '200':
+          description: The todo was updated successfully
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '400':
+          description: Bad request params
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '404':
+          description: The todo with such public_id wasn't found
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '422':
+          description: Bad request param
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  
+  /todo/delete/{public_id}:
+    delete:
+      security:
+        - bearerAuth: []
+      
+      summary: Method for deliting todos
+      tags:
+        - TODO
+      
+      parameters: 
+        - name: public_id
+          in: path
+          required: true
+          description: public todo id
+          schema:
+            type: string
+            example: 1790db46-376a-4da4-a6e5-40281c0c3861
+
+      responses:
+        '200':
+          description: The todo was deleted successfully
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '404':
+          description: The todo with such public_id wasn't found
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+        
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Message"
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Message"
+    
+    
+  schemas:
+    
+    Message:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: string
+          description: status explanation message
+    
+    ToDo:
+      type: object
+      required:
+        - public_id
+        - title
+        - body
+        - is_done
+        - created_on
+        - expiration_time
+      properties:
+        public_id:
+          type: string
+          example: 1790db46-376a-4da4-a6e5-40281c0c3861
+          description: todo's public id
+        title:
+          type: string
+          example: some-title
+          description: todo's title
+        body:
+          type: string
+          example: some-body
+          description: todo's body
+        is_done:
+          type: boolean
+          example: true
+          description: todo's done status
+        created_on:
+          type: string
+          format: date-time
+          example: 2023-09-30 22:37:14.452371
+          description: todo's creation time
+        expiration_time:
+          type: string
+          format: date-time
+          example: 2023-09-30 22:37:14.452371
+          description: todo's expiration time
+    ToDos:
+      type: array
+      items:
+        $ref: "#/components/schemas/ToDo"
+
